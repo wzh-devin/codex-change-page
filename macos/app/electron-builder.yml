@@ -1,0 +1,37 @@
+appId: com.devin.codex-change-page
+productName: Codex 换肤助手
+artifactName: Codex-Change-Page-${version}-${arch}.${ext}
+asar: true
+files:
+  - dist/**
+  - package.json
+extraResources:
+  - from: .engine
+    to: engine
+directories:
+  output: release
+  buildResources: build
+afterPack: scripts/after-pack.cjs
+mac:
+  category: public.app-category.utilities
+  minimumSystemVersion: "13.0"
+  target:
+    - target: dmg
+      arch:
+        - arm64
+  icon: build/AppIcon.icns
+  hardenedRuntime: false
+  gatekeeperAssess: false
+  extendInfo:
+    LSApplicationCategoryType: public.app-category.utilities
+    NSHighResolutionCapable: true
+dmg:
+  title: Codex 换肤助手 ${version}
+  contents:
+    - x: 170
+      y: 190
+      type: file
+    - x: 470
+      y: 190
+      type: link
+      path: /Applications

@@ -1,0 +1,12 @@
+packages:
+  - "."
+
+allowBuilds:
+  electron-winstaller: false
+
+minimumReleaseAgeExclude:
+  - vite@8.1.5
+
+onlyBuiltDependencies:
+  - electron
+  - esbuild

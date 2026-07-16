@@ -26,7 +26,11 @@ START_ERROR_LOG="$STATE_ROOT/start-error.log"
 CODEX_APP_JOB_LABEL="com.openai.codex-dream-skin-studio.app"
 INJECTOR_JOB_LABEL="com.openai.codex-dream-skin-studio.injector"
 EXPECTED_CODEX_TEAM_ID="${CODEX_EXPECTED_TEAM_ID:-2DC432GLL2}"
+<<<<<<< HEAD
 SKIN_VERSION="1.2.0"
+=======
+SKIN_VERSION="1.1.2"
+>>>>>>> 2f038b5322702cfb248d9c7564b56470a389abc2
 
 fail() {
   local message="$*"

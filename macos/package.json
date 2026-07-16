@@ -1,6 +1,10 @@
 {
   "name": "codex-dream-skin-studio",
+<<<<<<< HEAD
   "version": "1.2.0",
+=======
+  "version": "1.1.2",
+>>>>>>> 2f038b5322702cfb248d9c7564b56470a389abc2
   "private": true,
   "type": "module",
   "scripts": {

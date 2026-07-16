@@ -9,12 +9,15 @@
   "statusText": "THEME ONLINE",
   "quote": "Make something wonderful",
   "image": "portal-hero.png",
+<<<<<<< HEAD
   "imageSettings": {
     "focalX": 0.72,
     "focalY": 0.5,
     "brightness": 1,
     "overlayOpacity": 0.38
   },
+=======
+>>>>>>> 2f038b5322702cfb248d9c7564b56470a389abc2
   "colors": {
     "background": "#F7F4F5",
     "panel": "#FFFFFF",

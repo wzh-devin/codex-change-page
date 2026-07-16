@@ -26,7 +26,11 @@ trap '/bin/rm -rf "$TMP"' EXIT
   > "$CLIENT_ROOT/安装 Codex 主题编辑器.command"
 
 /usr/bin/printf '%s\n' \
+<<<<<<< HEAD
   'Codex 主题编辑器 1.2.0（脚本兼容包）' \
+=======
+  'Codex 主题编辑器 1.1.2' \
+>>>>>>> 2f038b5322702cfb248d9c7564b56470a389abc2
   '' \
   '推荐方式：把这个完整 ZIP、你喜欢的图片和“给 Codex 的部署提示词.md”一起发给自己的 Codex。' \
   '' \

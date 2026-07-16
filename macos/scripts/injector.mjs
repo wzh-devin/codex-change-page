@@ -5,7 +5,11 @@ import { normalizeTheme } from "./theme-schema.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, "..");
+<<<<<<< HEAD
 const SKIN_VERSION = "1.2.0";
+=======
+const SKIN_VERSION = "1.1.2";
+>>>>>>> 2f038b5322702cfb248d9c7564b56470a389abc2
 const LOOPBACK_HOSTS = new Set(["127.0.0.1", "localhost", "[::1]"]);
 const MAX_ART_BYTES = 16 * 1024 * 1024;
 

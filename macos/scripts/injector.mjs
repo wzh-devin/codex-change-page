@@ -1,10 +1,11 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { normalizeTheme } from "./theme-schema.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, "..");
-const SKIN_VERSION = "1.1.1";
+const SKIN_VERSION = "1.2.0";
 const LOOPBACK_HOSTS = new Set(["127.0.0.1", "localhost", "[::1]"]);
 const MAX_ART_BYTES = 16 * 1024 * 1024;
 
@@ -216,43 +217,12 @@ async function loadTheme(themeDir) {
 
   const configPath = path.join(assetsRoot, "theme.json");
   const raw = JSON.parse(await fs.readFile(configPath, "utf8"));
-  if (raw.schemaVersion !== 1 || typeof raw.image !== "string" || !raw.image) {
-    throw new Error(`${configPath} has an unsupported schema or image field`);
+  let theme;
+  try {
+    theme = normalizeTheme(raw);
+  } catch (error) {
+    throw new Error(`${configPath}: ${error.message}`);
   }
-  if (path.basename(raw.image) !== raw.image) throw new Error("Theme image must stay inside its theme directory");
-  const text = (value, fallback, max) => typeof value === "string" && value.trim()
-    ? value.trim().slice(0, max) : fallback;
-  const color = (value, fallback) => {
-    if (typeof value !== "string") return fallback;
-    const normalized = value.trim();
-    return /^#[0-9a-f]{6}$/i.test(normalized) || /^rgba?\([0-9., %]+\)$/i.test(normalized)
-      ? normalized
-      : fallback;
-  };
-  const theme = {
-    schemaVersion: 1,
-    id: text(raw.id, "custom", 80),
-    name: text(raw.name, "Codex Dream Skin", 80),
-    brandSubtitle: text(raw.brandSubtitle, "CODEX DREAM SKIN", 80),
-    tagline: text(raw.tagline, "Make something wonderful.", 160),
-    projectPrefix: text(raw.projectPrefix, "选择项目 · ", 80),
-    projectLabel: text(raw.projectLabel, "◉  选择项目", 80),
-    statusText: text(raw.statusText, "DREAM SKIN ONLINE", 80),
-    quote: text(raw.quote, "MAKE SOMETHING WONDERFUL", 80),
-    image: raw.image,
-    colors: {
-      background: color(raw.colors?.background, "#071116"),
-      panel: color(raw.colors?.panel, "#0b1a20"),
-      panelAlt: color(raw.colors?.panelAlt, "#10272c"),
-      accent: color(raw.colors?.accent, "#7cff46"),
-      accentAlt: color(raw.colors?.accentAlt, "#b8ff3d"),
-      secondary: color(raw.colors?.secondary, "#36d7e8"),
-      highlight: color(raw.colors?.highlight, "#642a8c"),
-      text: color(raw.colors?.text, "#e9fff1"),
-      muted: color(raw.colors?.muted, "#9ebdb3"),
-      line: color(raw.colors?.line, "rgba(124, 255, 70, .28)"),
-    },
-  };
   const imagePath = path.join(assetsRoot, theme.image);
   const imageStat = await fs.stat(imagePath);
   if (!imageStat.isFile() || imageStat.size < 1 || imageStat.size > MAX_ART_BYTES) {
@@ -511,6 +481,8 @@ try {
       version: SKIN_VERSION,
       themeId: loaded.theme.id,
       themeName: loaded.theme.name,
+      themeSchemaVersion: loaded.theme.schemaVersion,
+      imageSettings: loaded.theme.imageSettings,
       imageBytes: loaded.imageBytes,
       payloadBytes: Buffer.byteLength(loaded.payload),
     }, null, 2));

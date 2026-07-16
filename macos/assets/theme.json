@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "id": "custom-1784123441349",
   "name": "Dream Skin",
   "brandSubtitle": "CODEX DREAM SKIN",
@@ -8,7 +8,13 @@
   "projectLabel": "◉  选择项目",
   "statusText": "THEME ONLINE",
   "quote": "Make something wonderful",
-  "image": "background-20260715-215040-40507.jpg",
+  "image": "portal-hero.png",
+  "imageSettings": {
+    "focalX": 0.72,
+    "focalY": 0.5,
+    "brightness": 1,
+    "overlayOpacity": 0.38
+  },
   "colors": {
     "background": "#F7F4F5",
     "panel": "#FFFFFF",

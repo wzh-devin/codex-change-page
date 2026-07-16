@@ -41,7 +41,7 @@ elif [ "$CODEX_RUNNING" = "true" ] && [ "$RESTART_CODEX" = "false" ]; then
 fi
 
 if [ "$RESTORE_BASE_THEME" = "true" ]; then
-  "$NODE" "$SCRIPT_DIR/theme-config.mjs" restore "$CONFIG_PATH" "$THEME_BACKUP_PATH"
+  "$NODE" "$SCRIPT_DIR/theme-config.mjs" restore "$CONFIG_PATH" "$THEME_BACKUP_PATH" --keep-backup
 fi
 
 if [ "$RESTART_CODEX" = "true" ]; then
@@ -50,11 +50,15 @@ if [ "$RESTART_CODEX" = "true" ]; then
 fi
 
 /bin/rm -f "$STATE_PATH"
+if [ "$RESTORE_BASE_THEME" = "true" ]; then
+  /bin/rm -f "$THEME_BACKUP_PATH"
+fi
 if [ "$UNINSTALL" = "true" ]; then
   /bin/rm -f "$HOME/Desktop/Codex Dream Skin.command"
   /bin/rm -f "$HOME/Desktop/Codex Dream Skin - Customize.command"
   /bin/rm -f "$HOME/Desktop/Codex Dream Skin - Verify.command"
   /bin/rm -f "$HOME/Desktop/Codex Dream Skin - Restore.command"
+  /bin/rm -rf "$STATE_ROOT/menubar"
 fi
 
 printf 'Codex Dream Skin Studio was removed and the requested macOS restore actions completed successfully.\n'

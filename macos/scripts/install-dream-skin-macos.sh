@@ -27,6 +27,7 @@ deploy_project() {
   /usr/bin/rsync -a \
     --exclude '.git/' \
     --exclude '.DS_Store' \
+    --exclude 'app/' \
     --exclude 'release/' \
     --exclude 'runtime/' \
     "$PROJECT_ROOT/" "$temporary/"

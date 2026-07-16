@@ -10,6 +10,10 @@
   --ds-text: #e9fff1;
   --ds-muted: #9ebdb3;
   --ds-line: rgba(124, 255, 70, .28);
+  --dream-skin-focal-x: 72%;
+  --dream-skin-focal-y: 50%;
+  --dream-skin-brightness: 1;
+  --dream-skin-overlay-opacity: .38;
 }
 
 html.codex-dream-skin body {
@@ -101,9 +105,24 @@ html.codex-dream-skin main.main-surface {
    keeping every Codex message, output and control as live native DOM. */
 html.codex-dream-skin main.main-surface:not(.dream-skin-home-shell) {
   background:
-    linear-gradient(90deg, rgba(4, 10, 17, .95) 0%, rgba(6, 17, 24, .86) 47%, rgba(8, 18, 25, .64) 100%),
+    linear-gradient(
+      90deg,
+      rgb(4 10 17 / calc(var(--dream-skin-overlay-opacity) + .42)) 0%,
+      rgb(6 17 24 / calc(var(--dream-skin-overlay-opacity) + .28)) 47%,
+      rgb(8 18 25 / calc(var(--dream-skin-overlay-opacity) + .08)) 100%
+    ),
     radial-gradient(circle at 70% 38%, rgba(124, 255, 70, .08), transparent 28%),
-    var(--dream-skin-art) 76% center / cover no-repeat !important;
+    var(--dream-skin-art) var(--dream-skin-focal-x) var(--dream-skin-focal-y) / cover no-repeat !important;
+  background-blend-mode: normal, normal, normal;
+}
+
+html.codex-dream-skin main.main-surface:not(.dream-skin-home-shell)::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: calc((var(--dream-skin-brightness) - .6) * .08);
+  background: rgba(255, 255, 255, .18);
 }
 
 html.codex-dream-skin main.main-surface:not(.dream-skin-home-shell) [role="main"] {

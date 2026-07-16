@@ -1,7 +1,8 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 
-const [mode, configPath, backupPath] = process.argv.slice(2);
+const [mode, configPath, backupPath, ...flags] = process.argv.slice(2);
+const keepBackup = flags.includes("--keep-backup");
 // Backup these keys so Restore can put them back. Do NOT force dark —
 // Dream Skin CSS auto-adapts to light/dark via data-dream-shell.
 const settings = new Map([
@@ -101,6 +102,6 @@ if (mode === "install") {
   for (const key of settings.keys()) body = replaceSetting(body, key, backup.values[key] ?? null);
   const restored = content.slice(0, section.bodyStart) + body + content.slice(section.bodyEnd);
   await atomicWrite(configPath, restored, originalStat.mode & 0o777);
-  await fs.unlink(backupPath);
+  if (!keepBackup) await fs.unlink(backupPath);
   console.log("Restored the saved base-theme keys.");
 }

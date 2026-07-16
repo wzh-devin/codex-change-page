@@ -94,11 +94,12 @@
 
 ## 快速开始
 
-仓库内按平台放了现成脚本（实现细节不同，效果都是「主题化 Codex」）：
+推荐使用图形化安装包；旧脚本入口仍保留用于兼容和排障：
 
 | 平台 | 目录 | 入口 |
 |------|------|------|
-| Apple Silicon / Intel Mac | [`macos/`](./macos/) | 双击 `Install Codex Dream Skin.command` |
+| Apple Silicon Mac（macOS 13+） | [`macos/app/`](./macos/app/) | 构建/下载 DMG，拖入 Applications |
+| Mac 脚本兼容入口 | [`macos/`](./macos/) | `Install Codex Dream Skin.command` |
 | Windows | [`windows/`](./windows/) | `scripts/install-dream-skin.ps1` → `start-dream-skin.ps1` |
 
 更细的说明：

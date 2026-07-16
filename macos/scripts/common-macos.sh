@@ -26,7 +26,7 @@ START_ERROR_LOG="$STATE_ROOT/start-error.log"
 CODEX_APP_JOB_LABEL="com.openai.codex-dream-skin-studio.app"
 INJECTOR_JOB_LABEL="com.openai.codex-dream-skin-studio.injector"
 EXPECTED_CODEX_TEAM_ID="${CODEX_EXPECTED_TEAM_ID:-2DC432GLL2}"
-SKIN_VERSION="1.1.1"
+SKIN_VERSION="1.2.0"
 
 fail() {
   local message="$*"
@@ -187,18 +187,19 @@ pid_is_codex_descendant() {
 
 port_belongs_to_codex() {
   local port="$1"
-  local found_direct="false"
+  local found_listener="false"
   local pid
   local command_line
   while IFS= read -r pid; do
     [ -n "$pid" ] || continue
+    found_listener="true"
     command_line="$(/bin/ps -p "$pid" -o command= 2>/dev/null || true)"
     case "$command_line" in
-      "$CODEX_EXE"*) found_direct="true" ;;
+      "$CODEX_EXE"*) ;;
       *) pid_is_codex_descendant "$pid" || return 1 ;;
     esac
   done < <(listener_pids "$port")
-  [ "$found_direct" = "true" ]
+  [ "$found_listener" = "true" ]
 }
 
 # Cheap: can we talk to a loopback DevTools HTTP endpoint?
@@ -210,23 +211,8 @@ cdp_http_ready() {
 
 verified_cdp_endpoint() {
   local port="$1"
-  # Prefer identity check, but accept loopback CDP if HTTP is healthy and a
-  # ChatGPT/Codex process is listening (path case / helper PIDs can fail belongs).
-  if port_belongs_to_codex "$port"; then
-    cdp_http_ready "$port" || return 1
-    return 0
-  fi
-  cdp_http_ready "$port" || return 1
-  # Fallback: listener must still be ChatGPT-related.
-  local pid command_line
-  while IFS= read -r pid; do
-    [ -n "$pid" ] || continue
-    command_line="$(/bin/ps -p "$pid" -o command= 2>/dev/null || true)"
-    case "$command_line" in
-      *ChatGPT*|*Codex*|*codex*) return 0 ;;
-    esac
-  done < <(listener_pids "$port")
-  return 1
+  port_belongs_to_codex "$port" || return 1
+  cdp_http_ready "$port"
 }
 
 select_available_port() {
@@ -249,15 +235,7 @@ wait_for_cdp() {
   local deadline=$((SECONDS + 45))
   local last_note=0
   while [ "$SECONDS" -lt "$deadline" ]; do
-    # Fast path: HTTP up is enough to proceed once process identity is soft-ok.
-    if cdp_http_ready "$port"; then
-      if verified_cdp_endpoint "$port" || cdp_http_ready "$port"; then
-        # If HTTP is up and ChatGPT is running, accept.
-        if codex_is_running || verified_cdp_endpoint "$port"; then
-          return 0
-        fi
-      fi
-    fi
+    verified_cdp_endpoint "$port" && return 0
     if [ $((SECONDS - last_note)) -ge 8 ]; then
       last_note=$SECONDS
       printf 'Waiting for Codex debug port %s… (%ss)\n' "$port" "$SECONDS" >&2
@@ -320,6 +298,7 @@ stop_recorded_injector() {
   local saved_start
   local saved_node
   local saved_injector
+  local saved_port
   local actual_start
   local command_line
   pid="$(state_field injectorPid 2>/dev/null || true)"
@@ -335,34 +314,18 @@ stop_recorded_injector() {
   saved_start="$(state_field injectorStartedAt 2>/dev/null || true)"
   saved_node="$(state_field nodePath 2>/dev/null || true)"
   saved_injector="$(state_field injectorPath 2>/dev/null || true)"
-  # Soft identity check (macOS path case: /Users/Fei vs /Users/fei)
-  local node_ok="true" inj_ok="true"
-  if [ -n "$saved_node" ] && [ -n "${NODE:-}" ]; then
-    [ "$(printf '%s' "$saved_node" | /usr/bin/tr '[:upper:]' '[:lower:]')" = "$(printf '%s' "$NODE" | /usr/bin/tr '[:upper:]' '[:lower:]')" ] || node_ok="false"
-  fi
-  if [ -n "$saved_injector" ] && [ -n "${INJECTOR:-}" ]; then
-    [ "$(printf '%s' "$saved_injector" | /usr/bin/tr '[:upper:]' '[:lower:]')" = "$(printf '%s' "$INJECTOR" | /usr/bin/tr '[:upper:]' '[:lower:]')" ] || inj_ok="false"
-  fi
-  # If identity clearly wrong but process looks like our injector, still stop by cmdline.
+  saved_port="$(state_field port 2>/dev/null || true)"
+  [ -n "$saved_start" ] && [ -n "$saved_node" ] &&
+    [ -n "$saved_injector" ] && [ -n "$saved_port" ] || return 1
+  [ "$(printf '%s' "$saved_node" | /usr/bin/tr '[:upper:]' '[:lower:]')" = "$(printf '%s' "$NODE" | /usr/bin/tr '[:upper:]' '[:lower:]')" ] || return 1
+  [ "$(printf '%s' "$saved_injector" | /usr/bin/tr '[:upper:]' '[:lower:]')" = "$(printf '%s' "$INJECTOR" | /usr/bin/tr '[:upper:]' '[:lower:]')" ] || return 1
   command_line="$(/bin/ps -p "$pid" -o command= 2>/dev/null || true)"
   case "$command_line" in
-    *injector.mjs*--watch*) ;;
-    *)
-      if [ "$node_ok" = "true" ] && [ "$inj_ok" = "true" ]; then
-        :
-      else
-        # Stale PID that is not our injector — ignore
-        return 0
-      fi
-      ;;
+    *"$saved_node"*"$saved_injector"*--watch*--port*"$saved_port"*) ;;
+    *) return 1 ;;
   esac
-  if [ -n "$saved_start" ]; then
-    actual_start="$(process_started_at "$pid")"
-    if [ -n "$actual_start" ] && [ "$actual_start" != "$saved_start" ]; then
-      # PID recycled — do not kill stranger
-      return 0
-    fi
-  fi
+  actual_start="$(process_started_at "$pid")"
+  [ -n "$actual_start" ] && [ "$actual_start" = "$saved_start" ] || return 1
   /bin/launchctl remove "$INJECTOR_JOB_LABEL" >/dev/null 2>&1 || true
   /bin/kill -TERM "$pid" 2>/dev/null || true
   local deadline=$((SECONDS + 6))
@@ -375,9 +338,17 @@ launch_injector_daemon() {
   local port="$1"
   local pid=""
   local deadline=$((SECONDS + 10))
+  if /bin/launchctl print "gui/$(/usr/bin/id -u)/$INJECTOR_JOB_LABEL" >/dev/null 2>&1; then
+    fail "An untracked injector launchd job is already running; state was preserved for manual recovery."
+  fi
+  if /bin/ps -axo command= | /usr/bin/awk -v inj="$INJECTOR" '
+    index($0, inj) && index($0, "--watch") { found=1 }
+    END { exit found ? 0 : 1 }
+  '; then
+    fail "An untracked injector process is already running; state was preserved for manual recovery."
+  fi
   : > "$INJECTOR_LOG"
   : > "$INJECTOR_ERROR_LOG"
-  /bin/launchctl remove "$INJECTOR_JOB_LABEL" >/dev/null 2>&1 || true
 
   # Prefer a direct background process — launchctl submit is unreliable on newer macOS.
   /usr/bin/nohup "$NODE" "$INJECTOR" --watch --port "$port" --theme-dir "$THEME_DIR" \
@@ -464,18 +435,12 @@ hot_reapply_theme() {
   local port="${1:-9341}"
   local timeout_ms="${2:-8000}"
 
-  cdp_http_ready "$port" || return 1
   ensure_node_runtime || return 1
+  verified_cdp_endpoint "$port" || return 1
 
-  stop_recorded_injector 2>/dev/null || true
-  # Kill any leftover watch injectors for this theme injector path
-  local old
-  while IFS= read -r old; do
-    [ -n "$old" ] || continue
-    /bin/kill -TERM "$old" 2>/dev/null || true
-  done < <(/bin/ps -axo pid=,command= | /usr/bin/awk -v inj="$INJECTOR" '
-    index($0, inj) && index($0, "--watch") { print $1 }
-  ')
+  if [ -f "$STATE_PATH" ]; then
+    stop_recorded_injector 2>/dev/null || return 1
+  fi
   /bin/sleep 0.15
 
   local inj_pid

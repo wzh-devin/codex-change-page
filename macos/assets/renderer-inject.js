@@ -10,7 +10,8 @@
     "--ds-bg", "--ds-panel", "--ds-panel-2", "--ds-green", "--ds-lime",
     "--ds-cyan", "--ds-purple", "--ds-text", "--ds-muted", "--ds-line",
     "--dream-skin-name", "--dream-skin-tagline", "--dream-skin-project-prefix",
-    "--dream-skin-project-label",
+    "--dream-skin-project-label", "--dream-skin-focal-x", "--dream-skin-focal-y",
+    "--dream-skin-brightness", "--dream-skin-overlay-opacity",
   ];
   window[DISABLED_KEY] = false;
 
@@ -157,6 +158,11 @@
     root.style.setProperty("--dream-skin-tagline", cssString(THEME.tagline || "Make something wonderful."));
     root.style.setProperty("--dream-skin-project-prefix", cssString(THEME.projectPrefix || "选择项目 · "));
     root.style.setProperty("--dream-skin-project-label", cssString(THEME.projectLabel || "◉  选择项目"));
+    const imageSettings = THEME.imageSettings || {};
+    root.style.setProperty("--dream-skin-focal-x", `${Math.round((imageSettings.focalX ?? 0.72) * 100)}%`);
+    root.style.setProperty("--dream-skin-focal-y", `${Math.round((imageSettings.focalY ?? 0.5) * 100)}%`);
+    root.style.setProperty("--dream-skin-brightness", String(imageSettings.brightness ?? 1));
+    root.style.setProperty("--dream-skin-overlay-opacity", String(imageSettings.overlayOpacity ?? 0.38));
   };
 
   const existingStyle = document.getElementById(STYLE_ID);

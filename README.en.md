@@ -95,11 +95,12 @@ One image, one mood. Real theme previews you can ship:
 
 ## Quick start
 
-Platform scripts are ready — different plumbing, same goal: theme Codex.
+The graphical manager is recommended. Legacy scripts remain available for compatibility and troubleshooting.
 
 | Platform | Dir | Entry |
 |------|------|------|
-| Apple Silicon / Intel Mac | [`macos/`](./macos/) | Double-click `Install Codex Dream Skin.command` |
+| Apple Silicon Mac (macOS 13+) | [`macos/app/`](./macos/app/) | Build/download the DMG and drag the app to Applications |
+| Legacy Mac scripts | [`macos/`](./macos/) | `Install Codex Dream Skin.command` |
 | Windows | [`windows/`](./windows/) | `scripts/install-dream-skin.ps1` → `start-dream-skin.ps1` |
 
 More detail:

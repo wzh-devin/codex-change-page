@@ -10,11 +10,48 @@ This project injects through **local loopback CDP**. It does **not** modify the 
 
 ## Requirements
 
-- macOS
+- Apple Silicon Mac (`arm64`)
+- macOS 13 or newer for the graphical manager
 - Official Codex Desktop installed and launched at least once (`~/.codex/config.toml` exists)
 - No global Node.js install required (uses Codex’s signed bundled Node after validation)
 
-## Quick start (from this repo)
+## Recommended: Codex 换肤助手
+
+The Electron manager provides guided installation, theme creation, a theme library,
+diagnostics, menu-bar shortcuts, restore, engine uninstall, and safe `.codexskin`
+import/export.
+
+Build the arm64 test DMG:
+
+```bash
+cd app
+pnpm install
+pnpm package:mac
+pnpm verify:package
+```
+
+Open `app/release/Codex-Change-Page-1.2.0-arm64.dmg`, drag **Codex 换肤助手**
+to Applications, then right-click Open for the first ad-hoc-signed test launch.
+
+The first-run wizard performs:
+
+1. macOS / arm64 / Codex signature and runtime inspection.
+2. Versioned Engine installation and selective appearance backup.
+3. Bundled-theme or personal-image selection.
+4. Explicit confirmation before launching or restarting Codex with loopback CDP.
+
+The app keeps the compatible runtime paths:
+
+| Item | Path |
+| --- | --- |
+| Engine | `~/.codex/codex-dream-skin-studio` |
+| State / logs / themes | `~/Library/Application Support/CodexDreamSkinStudio` |
+| App preferences | `~/Library/Application Support/Codex 换肤助手` |
+
+Use **恢复与卸载 → 恢复官方外观** to stop the injector, restore the saved
+appearance values, close the debug session, and restart Codex normally.
+
+## Legacy script workflow
 
 ```bash
 # 1) Optional static checks (needs Codex.app present for bundled Node path)
@@ -37,7 +74,7 @@ This project injects through **local loopback CDP**. It does **not** modify the 
 # Look for 🎨 Skin in the top-right menu bar
 ```
 
-Install location after step 2:
+Legacy install location after step 2:
 
 | Item | Path |
 | --- | --- |
@@ -47,7 +84,8 @@ Install location after step 2:
 
 ## Customer ZIP (optional packaging)
 
-To build the “double-click install” folder layout for non-git users:
+The ZIP workflow remains available as a compatibility package. New deliveries should
+prefer the DMG manager.
 
 ```bash
 ./scripts/build-client-release.sh "$HOME/Desktop/Codex 主题编辑器.zip"

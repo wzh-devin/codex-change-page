@@ -8,3 +8,11 @@ docs/screenshots/
 .idea/
 .vscode/
 *.swp
+engine-manifest.json
+app/node_modules/
+app/dist/
+app/release/
+app/.engine/
+app/test-results/
+app/playwright-report/
+app/build/AppIcon.icns

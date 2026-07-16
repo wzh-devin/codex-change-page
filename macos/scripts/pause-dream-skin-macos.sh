@@ -28,7 +28,8 @@ REMOVED="false"
 # Drop any launchd job that would relaunch Codex with CDP after quit / quitting the menu bar.
 release_codex_launchd_job || true
 if [ -f "$STATE_PATH" ]; then
-  stop_recorded_injector || true
+  stop_recorded_injector \
+    || fail "The recorded injector identity could not be verified; pause stopped safely and preserved state."
 fi
 
 DEBUG_READY="false"

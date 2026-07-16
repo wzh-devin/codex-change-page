@@ -68,7 +68,7 @@ const secondary = validateHex(valueFor("secondary", "#36d7e8"), "secondary");
 const highlight = validateHex(valueFor("highlight", "#642a8c"), "highlight");
 
 const custom = {
-  schemaVersion: 1,
+  schemaVersion: 2,
   id: `custom-${Date.now()}`,
   name: name || "我的 Codex Dream Skin",
   brandSubtitle: "CODEX DREAM SKIN",
@@ -78,6 +78,12 @@ const custom = {
   statusText: "DREAM SKIN ONLINE",
   quote: quote || "MAKE SOMETHING WONDERFUL",
   image,
+  imageSettings: {
+    focalX: 0.72,
+    focalY: 0.5,
+    brightness: 1,
+    overlayOpacity: 0.38,
+  },
   colors: {
     background: "#071116",
     panel: "#0b1a20",
